@@ -12,6 +12,7 @@ const HotCollections = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const skeletonItems = Array.from({ length: 4 });
+  const isMobile = window.innerWidth < 768;
 
   useEffect(() => {
     const getCollections = async () => {
@@ -86,16 +87,21 @@ const HotCollections = () => {
     <section id="section-collections" className="no-bottom">
       <div className="container">
         <div className="row">
-          <div className="col-lg-12">
+          <div className="col-lg-12" data-aos="fade-up">
             <div className="text-center">
               <h2>Hot Collections</h2>
               <div className="small-border bg-color-2"></div>
             </div>
           </div>
-          <div className="col-lg-12">
+          <div className="col-lg-12" data-aos="fade-up" data-aos-delay="120">
             <OwlCarousel className="owl-theme" {...carouselOptions}>
-              {collections.map((collection) => (
-                <div className="nft_coll" key={collection.id}>
+              {collections.map((collection, index) => (
+                <div
+                  className="nft_coll"
+                  key={collection.id}
+                  data-aos={isMobile ? "fade-up" : (index % 2 === 0 ? "flip-left" : "fade-up")}
+                  data-aos-delay={isMobile ? (index % 3) * 40 : index * 70}
+                >
                   <div className="nft_wrap" style={{ height: "230px" }}>
                     <Link to={`/item-details/${collection.nftId}`}>
                       <img src={collection.nftImage} className="lazy img-fluid" alt={collection.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />

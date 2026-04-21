@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AuthorBanner from "../images/author_banner.jpg";
 import AuthorItems from "../components/author/AuthorItems";
-import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import Skeleton from "../components/UI/Skeleton";
 
@@ -10,6 +9,9 @@ const Author = () => {
   const [author, setAuthor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  const FOLLOW_STORAGE_KEY = "followed-authors";
 
   useEffect(() => {
     const fetchAuthor = async () => {
@@ -50,10 +52,41 @@ const Author = () => {
     }
   };
 
+  useEffect(() => {
+    if (!authorId) {
+      return;
+    }
+
+    const followedAuthors = JSON.parse(localStorage.getItem(FOLLOW_STORAGE_KEY) || "{}");
+    setIsFollowing(Boolean(followedAuthors[authorId]));
+  }, [authorId]);
+
+  const handleFollowToggle = () => {
+    if (!authorId) {
+      return;
+    }
+
+    const followedAuthors = JSON.parse(localStorage.getItem(FOLLOW_STORAGE_KEY) || "{}");
+    const nextFollowingState = !isFollowing;
+
+    if (nextFollowingState) {
+      followedAuthors[authorId] = true;
+    } else {
+      delete followedAuthors[authorId];
+    }
+
+    localStorage.setItem(FOLLOW_STORAGE_KEY, JSON.stringify(followedAuthors));
+    setIsFollowing(nextFollowingState);
+  };
+
   const bannerImage =
     author?.nftCollection?.[0]?.nftImage ||
     author?.authorImage ||
     AuthorBanner;
+
+  const displayedFollowers = author
+    ? author.followers + (isFollowing ? 1 : 0)
+    : 0;
 
   return (
     <div id="wrapper">
@@ -64,6 +97,7 @@ const Author = () => {
           id="profile_banner"
           aria-label="section"
           className="text-light"
+          data-aos="zoom-out"
           data-bgimage={`url(${bannerImage}) top`}
           style={{ background: `url(${bannerImage}) center / cover no-repeat` }}
         ></section>
@@ -92,7 +126,7 @@ const Author = () => {
                 )}
                 {!loading && error && <div className="text-danger">{error}</div>}
                 {!loading && !error && author && (
-                <div className="d_profile de-flex">
+                <div className="d_profile de-flex" data-aos="fade-up" data-aos-delay="120">
                   <div className="de-flex-col">
                     <div className="profile_avatar">
                       <img src={author.authorImage} alt={author.authorName?.trim() || "Author"} />
@@ -114,17 +148,17 @@ const Author = () => {
                   </div>
                   <div className="profile_follow de-flex">
                     <div className="de-flex-col">
-                      <div className="profile_follower">{author.followers} followers</div>
-                      <Link to="#" className="btn-main">
-                        Follow
-                      </Link>
+                      <div className="profile_follower">{displayedFollowers} followers</div>
+                      <button type="button" className="btn-main" onClick={handleFollowToggle}>
+                        {isFollowing ? "Following" : "Follow"}
+                      </button>
                     </div>
                   </div>
                 </div>
                 )}
               </div>
 
-              <div className="col-md-12">
+              <div className="col-md-12" data-aos="fade-up" data-aos-delay="200">
                 <div className="de_tab tab_simple">
                   <AuthorItems author={author} loading={loading} />
                 </div>
