@@ -4,46 +4,13 @@ import OwlCarousel from "react-owl-carousel";
 import "owl.carousel/dist/assets/owl.carousel.css";
 import "owl.carousel/dist/assets/owl.theme.default.css";
 import Skeleton from "../UI/Skeleton";
-
-const CountdownTimer = ({ expiryDate }) => {
-  const [currentTime, setCurrentTime] = useState(Date.now());
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setCurrentTime(Date.now());
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, []);
-
-  if (!expiryDate) {
-    return null;
-  }
-
-  const difference = expiryDate - currentTime;
-
-  if (difference <= 0) {
-    return <div className="de_countdown">Ended</div>;
-  }
-
-  const totalSeconds = Math.floor(difference / 1000);
-  const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  if (days > 0) {
-    const remainingHours = Math.floor((totalSeconds % 86400) / 3600);
-    return <div className="de_countdown">{`${days}d ${remainingHours}h ${minutes}m ${seconds}s`}</div>;
-  }
-
-  return <div className="de_countdown">{`${hours}h ${minutes}m ${seconds}s`}</div>;
-};
+import CountdownTimer from "../UI/CountdownTimer";
 
 const NewItems = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const isMobile = window.innerWidth < 768;
 
   useEffect(() => {
     const fetchNewItems = async () => {
@@ -108,7 +75,7 @@ const NewItems = () => {
     <section id="section-items" className="no-bottom">
       <div className="container">
         <div className="row">
-          <div className="col-lg-12">
+          <div className="col-lg-12" data-aos="fade-up">
             <div className="text-center">
               <h2>New Items</h2>
               <div className="small-border bg-color-2"></div>
@@ -117,10 +84,15 @@ const NewItems = () => {
           {loading && Array.from({ length: 4 }).map((_, index) => renderSkeletonCard(index))}
           {!loading && error && <div className="col-lg-12 text-center text-danger">{error}</div>}
           {!loading && !error && (
-            <div className="col-lg-12">
+            <div className="col-lg-12" data-aos="fade-up" data-aos-delay="120">
               <OwlCarousel className="owl-theme" {...carouselOptions}>
-                {items.map((item) => (
-                  <div className="nft__item" key={item.id}>
+                {items.map((item, index) => (
+                  <div
+                    className="nft__item"
+                    key={item.id}
+                    data-aos={isMobile ? "fade-up" : (index % 3 === 0 ? "zoom-in-up" : "fade-up")}
+                    data-aos-delay={isMobile ? (index % 3) * 35 : index * 65}
+                  >
                     <div className="author_list_pp">
                       <Link
                         to={`/author/${item.authorId}`}
