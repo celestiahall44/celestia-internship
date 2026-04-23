@@ -47,8 +47,8 @@ const Author = () => {
 
     try {
       await navigator.clipboard.writeText(author.address);
-    } catch (err) {
-      console.error(err);
+    } catch {
+      return;
     }
   };
 
